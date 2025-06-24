@@ -13,12 +13,6 @@ An intelligent chatbot powered by Retrieval-Augmented Generation (RAG) that answ
 
 ---
 
-## 🖥️ Demo
-
-![demo.gif](link-if-you-record-one)
-
----
-
 ## 🧱 Tech Stack
 
 - **Frontend**: Streamlit
