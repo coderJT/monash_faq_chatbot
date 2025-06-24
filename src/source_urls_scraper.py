@@ -4,14 +4,13 @@ from bs4 import BeautifulSoup
 import re
 import time
 import csv
-import asyncio
-
-start_time = time.time()
 
 MONASH_STUDENT_ADMIN_URL = 'https://www.monash.edu/students/admin/dates/principal-dates'
 
+start_time = time.time()
+
 ### Source URLs scraping logic ###
-async def main():
+async def scrape_url():
     async with Stealth().use_async(async_playwright()) as p:
         browser = await p.chromium.launch()
         page = await browser.new_page()
@@ -45,6 +44,7 @@ async def main():
                 cleaned_title = re.sub(r"^\d+\.\s*", "", title)
                 links.append((cleaned_title, a_tag["href"]))
 
+        # Save the links to a csv file for ease of compatability 
         with open("links.csv", "w", newline='', encoding="utf-8") as f:
             writer = csv.writer(f)
             writer.writerow(["Title", "URL"])  
@@ -55,6 +55,3 @@ async def main():
 
     end_time = time.time()
     print(f"Scraper took {end_time - start_time:.2f} seconds to scrape all URLs.")
-
-
-asyncio.run(main())
