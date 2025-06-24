@@ -11,6 +11,9 @@ start_time = time.time()
 
 ### Source URLs scraping logic ###
 async def scrape_url():
+
+    print("Scraping all URLS... This will take less than 30 seconds.")
+
     async with Stealth().use_async(async_playwright()) as p:
         browser = await p.chromium.launch()
         page = await browser.new_page()
