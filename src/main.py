@@ -10,9 +10,9 @@ from query_rag import evaluate  # This function should take user query as input
 # Ensure async setup steps only run once
 @st.cache_resource
 def run_setup_pipeline():
-    # asyncio.run(scrape_url())
-    # asyncio.run(scrape_pages())
-    # process_data()
+    asyncio.run(scrape_url())
+    asyncio.run(scrape_pages())
+    process_data()
     indexing()
 
 # UI
