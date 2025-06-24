@@ -38,7 +38,7 @@ async def scrape_page(links, browser, title, url):
 
     # Here BeautifulSoup is used as the page is rather static
     html = await page.content()
-    soup = BeautifulSoup(html, "lxml") 
+    soup = BeautifulSoup(html, "html.parser") 
 
     # All pages share the same main content structure as of 24 June 2025
     raw_html = soup.find("div", class_="content-inner__main")

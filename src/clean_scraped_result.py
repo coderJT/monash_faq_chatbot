@@ -5,7 +5,7 @@ from bs4 import BeautifulSoup
 
 def preclean_html(html):
 
-    soup = BeautifulSoup(html, "lxml")
+    soup = BeautifulSoup(html, "html.parser")
 
     # Emphasize on the important text contents
     for h in soup.find_all(['h1', 'h2', 'h3']):
