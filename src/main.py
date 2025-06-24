@@ -1,26 +1,40 @@
+import streamlit as st
+import asyncio
+
 from source_urls_scraper import scrape_url
 from url_details_scraper import scrape_pages
 from clean_scraped_result import process_data
 from build_index import indexing
-from query_rag import evaluate
-import asyncio
+from query_rag import evaluate  # This function should take user query as input
 
-async def main():
+# Ensure async setup steps only run once
+@st.cache_resource
+def run_setup_pipeline():
+    # asyncio.run(scrape_url())
+    # asyncio.run(scrape_pages())
+    # process_data()
+    indexing()
 
-    # Step 1: Scrape source URLs
-    urls = await scrape_url()
+# UI
+st.set_page_config(page_title="Monash Student Chatbot", layout="centered")
+st.title("🎓 Monash Student Chatbot")
+st.markdown("Ask me anything about Monash University policies!")
 
-    # Step 2: Scrape details from URLs
-    pages_data = await scrape_pages()
+# Run setup once
+with st.spinner("Setting up backend (first time only)..."):
+    run_setup_pipeline()
 
-    # Step 3: Clean and process scraped data
-    processed_data = process_data()
+# Session state to track conversation history
+if "chat_history" not in st.session_state:
+    st.session_state.chat_history = []
 
-    # Step 4: Build index
-    index = indexing()
+# Handle input
+user_input = st.chat_input("Type your question here...")
+if user_input:
+    with st.spinner("Thinking..."):
+        st.session_state.chat_history.append({"role": "user", "text": user_input})
 
-    # Step 5: Launch the LLM
-    answer = evaluate()
+        with st.chat_message("assistant"):
+            response = st.write_stream(evaluate(user_input)) 
 
-if __name__ == "__main__":
-    asyncio.run(main())
+        st.session_state.chat_history.append({"role": "bot", "text": response})

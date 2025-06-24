@@ -4,7 +4,7 @@ import json
 import numpy as np
 from sentence_transformers import SentenceTransformer
 
-model = SentenceTransformer("BAAI/bge-large-en")
+model = SentenceTransformer("all-MiniLM-L6-v2")
 
 def normalize(vectors):
     return vectors / np.linalg.norm(vectors, axis=1, keepdims=True)
