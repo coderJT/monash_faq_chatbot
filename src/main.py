@@ -3,6 +3,7 @@ from url_details_scraper import scrape_pages
 from clean_scraped_result import process_data
 from build_index import indexing
 from query_rag import evaluate
+import asyncio
 
 async def main():
 
@@ -22,4 +23,4 @@ async def main():
     answer = evaluate()
 
 if __name__ == "__main__":
-    main()
+    asyncio.run(main())
