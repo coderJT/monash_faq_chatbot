@@ -1,5 +1,6 @@
 import streamlit as st
 import asyncio
+import playwright_setup
 
 from source_urls_scraper import scrape_url
 from url_details_scraper import scrape_pages
