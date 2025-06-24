@@ -2,6 +2,7 @@ from playwright.sync_api import sync_playwright
 from bs4 import BeautifulSoup
 import re
 import time
+import csv
 
 start_time = time.time()
 
@@ -19,7 +20,7 @@ with sync_playwright() as p:
     except:
         pass
 
-    page.wait_for_timeout(3000)  # Wait for content to render
+    page.wait_for_timeout(3000) 
 
     # Expand all sidebar buttons
     expand_buttons = page.query_selector_all('button.lhs-nav-list__item-cta')
@@ -27,6 +28,8 @@ with sync_playwright() as p:
     # Extract HTML after expansion
     html = page.content()
     soup = BeautifulSoup(html, "html.parser")
+
+    print(html)
 
     # Get all nested sidebar <li> items (level 3)
     categories = soup.find_all("li", class_="lhs-nav-list__item--lvl3")
@@ -42,12 +45,16 @@ with sync_playwright() as p:
             cleaned_title = re.sub(r"^\d+\.\s*", "", title)
             links.append((cleaned_title, a_tag["href"]))
 
-    browser.close()
+    with open("links.csv", "w", newline='', encoding="utf-8") as f:
+        writer = csv.writer(f)
+        writer.writerow(["Title", "URL"])  
+        for title, url in links:
+            writer.writerow([title, url])
 
-    for title, url in links:
-        with open("data.txt", "a", encoding="utf-8") as f:
-            f.write(f"{title} → {url}\n")
+    browser.close()
 
 end_time = time.time()
 print(f"Scraper took {end_time - start_time:.2f} seconds to scrape all URLs.")
+
+### Process each URL and extract its contents ###
 
