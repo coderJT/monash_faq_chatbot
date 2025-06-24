@@ -9,11 +9,44 @@ def preclean_html(html):
     for h in soup.find_all(['h1', 'h2', 'h3']):
         h.insert_before("\n\n## " + h.get_text(strip=True) + "\n")
 
-    for ul in soup.find_all(["ul", "ol"]):
+    for ul in soup.find_all(['ul', 'ol']):
         bullets = []
-        for li in ul.find_all("li"):
-            bullets.append("• " + li.get_text(strip=True))
-        ul.replace_with("\n".join(bullets))
+        for li in ul.find_all('li', recursive=False):
+            # Check for links
+            link = li.find('a')
+            if link:
+                text = link.get_text(strip=True)
+                href = link.get('href')
+                bullets.append(f"• [{text}]({href})")
+            else:
+                bullets.append("• " + li.get_text(strip=True))
+        ul.replace_with("\n" + "\n".join(bullets) + "\n")
+
+    for box in soup.find_all(class_='semester-box'):
+        output = []
+        # Get semester title
+        title = box.find(class_='semester-title')
+        if title:
+            output.append(f"\n\n### {title.get_text(strip=True)}")
+
+        # Get each event with <strong> and <br>
+        for obj in box.find_all(class_='semester-object'):
+            strong = obj.find('strong')
+            label = strong.get_text(strip=True) if strong else ""
+            strong.extract() if strong else None
+
+            # Get remaining value text
+            value = obj.get_text(" ", strip=True)
+            if label and value:
+                output.append(f"- {label}: {value}")
+            elif label:
+                output.append(f"- {label}")
+            elif value:
+                output.append(f"- {value}")
+
+        # Replace the box with our clean markdown
+        box.replace_with("\n".join(output))
+
 
     return str(soup)
 
@@ -28,7 +61,7 @@ for filename in os.listdir("pages"):
             html = f.read()
         
         cleaned_html = preclean_html(html)
-        text = extract(cleaned_html, include_tables=True, include_links=True)
+        text = extract(cleaned_html, favor_precision=False, include_tables=True, include_links=True)
         
         if text and text.strip():
             out_path = f"cleaned/{filename.replace('.txt', '.clean.txt')}"
