@@ -1,16 +1,14 @@
 import subprocess
 import sys
+import os
 
-def install_playwright_browsers():
-    try:
-        # Only install if not already installed
-        subprocess.run(
-            [sys.executable, "-m", "playwright", "install", "--with-deps"],
-            check=True
-        )
-        print("✅ Playwright browsers installed.")
-    except subprocess.CalledProcessError as e:
-        print("Failed to install Playwright browsers:", e)
+def install_playwright():
+    cache_path = os.path.expanduser("~/.cache/ms-playwright")
+    if not os.path.exists(os.path.join(cache_path, "chromium")):
+        print("🔧 Installing Playwright browsers...")
+        subprocess.run([sys.executable, "-m", "playwright", "install", "chromium"], check=True)
+    else:
+        print("✅ Playwright browsers already installed.")
 
-if __name__ == "__main__":
-    install_playwright_browsers()
+# Run on import
+install_playwright()
