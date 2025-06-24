@@ -5,6 +5,7 @@ from bs4 import BeautifulSoup, Comment
 import os
 import asyncio
 import aiofiles
+from readability import Document
 
 # Load all links from the CSV
 links = []
@@ -18,35 +19,52 @@ os.makedirs("pages", exist_ok=True)
 async def scrape_page(browser, title, url):
     page = await browser.new_page()
     print(f"Scraping: {title} - {url}")
-    await page.goto(url)
+
+    # For simplicity, we will disregard pdf files first
+    if url.lower().endswith(".pdf"):
+        print(f"Skipping PDF: {url}")
+        return
+    
+    try:
+        await page.goto(url, timeout=15000)
+    except Exception as e:
+        print(f"Error scraping {url}: {e}")
+        await page.close()
+        return
 
     try:
         await page.click('text="Accept all"', timeout=2000)
     except:
         pass
 
-    html = await page.content()
-    soup = BeautifulSoup(html, "html.parser")
+    try:
+        # Use Readability to extract key information
+        response = Document(await page.content())
+    except:
 
-    raw_html = soup.find("div", class_="content-inner__main")
-    if not raw_html:
-        await page.close()
-        return
+        # Resort to manual scraping
+        html = await page.content()
+        soup = BeautifulSoup(html, "html.parser")
 
-    for tag in raw_html.find_all(["nav", "style", "script", "noscript", "iframe"]):
-        tag.decompose()
+        raw_html = soup.find("div", class_="content-inner__main")
+        if not raw_html:
+            await page.close()
+            return
 
-    faq_help_panel = raw_html.find("div", id="monash-faq-help-panel")
-    if faq_help_panel:
-        faq_help_panel.decompose()
+        for tag in raw_html.find_all(["nav", "style", "script", "noscript", "iframe"]):
+            tag.decompose()
 
-    for comment in raw_html.find_all(string=lambda text: isinstance(text, Comment)):
-        comment.extract()
+        faq_help_panel = raw_html.find("div", id="monash-faq-help-panel")
+        if faq_help_panel:
+            faq_help_panel.decompose()
 
-    cleaned_html = str(raw_html)
+        for comment in raw_html.find_all(string=lambda text: isinstance(text, Comment)):
+            comment.extract()
+
+        response = str(raw_html)
 
     async with aiofiles.open(f"pages/{title}.txt", "w", encoding="utf-8") as out:
-        await out.write(cleaned_html)
+        await out.write(response.summary())
 
     await page.close()
 
@@ -55,7 +73,7 @@ async def main():
         browser = await p.chromium.launch()
 
         # Limit concurrency to avoid overloading system or being blocked
-        semaphore = asyncio.Semaphore(10)
+        semaphore = asyncio.Semaphore(5)
 
         async def sem_scrape(title, url):
             async with semaphore:
