@@ -10,7 +10,7 @@ MONASH_STUDENT_ADMIN_URL = 'https://www.monash.edu/students/admin/dates/principa
 
 ### Source URLs scraping logic ###
 with sync_playwright() as p:
-    browser = p.chromium.launch()
+    browser = p.chromium.launch(headless=False)
     page = browser.new_page()
     page.goto(MONASH_STUDENT_ADMIN_URL)
 
@@ -35,9 +35,10 @@ with sync_playwright() as p:
     categories = soup.find_all("li", class_="lhs-nav-list__item--lvl3")
     links = []  
 
-    # Extract all sublinks (level 4 and 5) for each category (level 3)
+    # Extract all sublinks (level 4 and 5) for each category (level 3), 
+    # we need to excude level 3 links due to repetitive structure
     for category in categories:
-        a_tags = category.find_all('a', class_="lhs-nav-list__item-link")
+        a_tags = category.find_all('a', class_=re.compile(r"lhs-nav-list__item-link--lvl\d+"))
         for a_tag in a_tags:
             title = a_tag.get_text(strip=True)
 
@@ -56,5 +57,5 @@ with sync_playwright() as p:
 end_time = time.time()
 print(f"Scraper took {end_time - start_time:.2f} seconds to scrape all URLs.")
 
-### Process each URL and extract its contents ###
+
 
