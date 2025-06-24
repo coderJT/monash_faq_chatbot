@@ -1,3 +1,6 @@
 .venv
 /pages
 /cleaned
+/saved_models
+/index
+chat_history.json

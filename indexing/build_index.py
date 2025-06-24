@@ -6,12 +6,16 @@ import json
 import numpy as np
 from sentence_transformers import SentenceTransformer
 
-model = SentenceTransformer("all-MiniLM-L6-v2")
+model = SentenceTransformer("BAAI/bge-large-en")
+
+def normalize(vectors):
+    return vectors / np.linalg.norm(vectors, axis=1, keepdims=True)
 
 # Load cleaned data
 documents = []
 metadata = []
 
+# Chunking
 for filename in os.listdir("cleaned"):
     if filename.endswith(".clean.txt"):
         with open(f"cleaned/{filename}", encoding="utf-8") as f:
@@ -31,11 +35,15 @@ for filename in os.listdir("cleaned"):
 
 # Compute embeddings
 print(f"Embedding {len(documents)} chunks...")
-embeddings = model.encode(documents, show_progress_bar=True)
+
+# Normalize the embeddings to use cosine similarity
+embeddings = normalize(model.encode(documents, show_progress_bar=True))
 
 # Store the embedding in FAISS
 dim = embeddings[0].shape[0]
-index = faiss.IndexFlatL2(dim)
+
+# Use inner product index for cosine similarity
+index = faiss.IndexFlatIP(dim)
 index.add(np.array(embeddings))
 
 # Save the index and metadata
