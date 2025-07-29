@@ -1,5 +1,7 @@
 # 🎓 Monash Student Chatbot (RAG-based FAQ Assistant)
 
+<img width="1113" height="717" alt="Screenshot 2025-07-29 at 9 03 43 PM" src="https://github.com/user-attachments/assets/25b215da-0103-444c-8ed1-9e3d89daba42" />
+
 An intelligent chatbot powered by Retrieval-Augmented Generation (RAG) that answers student administrative questions about Monash University using real university policy documents. Built with Gemini API, FAISS vector search, and Streamlit for an interactive web interface.
 
 ## 🚀 Features
