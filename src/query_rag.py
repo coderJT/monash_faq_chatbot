@@ -70,9 +70,12 @@ def evaluate(question: str):
 
     full_response = ""
     for chunk in response_stream:
-        if chunk.text:
-            yield chunk.text  # stream each chunk
-            full_response += chunk.text
+        try:
+            if hasattr(chunk, "parts") and chunk.parts:
+                text = ''.join([p.text for p in chunk.parts if hasattr(p, "text")])
+                yield text
+        except Exception as e:
+            print(f"Warning: Skipped invalid chunk: {e}")
 
     # Save conversation
     chat_history.append(f"User: {question}")
